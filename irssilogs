@@ -1,0 +1,73 @@
+#!/usr/bin/python
+
+import re
+import sys
+import datetime
+
+def on_log_open(vars, timestamp):
+    timestamp = datetime.datetime.strptime(timestamp, '%a %b %d %H:%M:%S %Y')
+    vars.date = timestamp.date()
+    vars.text += (timestamp, []),
+
+def on_date_change(vars, date):
+    timestamp = datetime.datetime.strptime(date, '%a %b %d %Y')
+    vars.date = timestamp.date()
+
+def on_start_talk(vars, stranger):
+    vars.stranger = stranger
+
+def on_send(vars, time, text):
+    line = '%s %s\t>>\t%s' % (vars.date, time, text)
+    vars.append_line(line)
+
+def on_receive(vars, time, text):
+    line = '%s %s\t<<\t%s' % (vars.date, time, text)
+    vars.append_line(line)
+
+def on_me(vars, time, text):
+    line = '%s %s\t**\t%s' % (vars.date, time, text)
+    vars.append_line(line)
+
+regexps = {
+    r'^--- Log opened (?P<timestamp>.*)': on_log_open,
+    r'^--- Log closed (?P<timestamp>.*)': None,
+    r'^--- Day changed (?P<date>.*)': on_date_change,
+    r'^(?P<time>[0-9:]{5}) >> (?P<text>.*)': on_send,
+    r'^(?P<time>[0-9:]{5}) << (?P<text>.*)': on_receive,
+    r'^(?P<time>[0-9:]{5})  [*] (?P<text>.*)': on_me,
+    r'^[0-9:]{5} -!- Irssi: Starting query in [:.@\w]+ with (?P<stranger>\w+)': None,
+    r'^[0-9:]{5} -!- \w+ \[[\w~@.:-]+\] has quit ': None,
+    r'^[0-9:]{5} -!- \w+ is now known as \w+$': None,
+}
+
+regexps = dict((re.compile(k), v) for k, v in regexps.iteritems())
+
+class Vars(object):
+    date = None
+    stranger = None
+    text = []
+
+    def append_line(self, line):
+        self.text[-1][1].append(line)
+
+def main():
+    vars = Vars()
+    for line in sys.stdin:
+        for regexp, callback in regexps.iteritems():
+            m = regexp.match(line)
+            if not m:
+                continue
+            if callback:
+                callback(vars, **m.groupdict())
+            break
+        else:
+            raise ValueError(line)
+    for _, chunk in sorted(vars.text):
+        if not chunk:
+            continue
+        print '\n'.join(chunk)
+
+if __name__ == '__main__':
+    main()
+
+# vim:ts=4 sw=4 et
