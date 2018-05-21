@@ -8,8 +8,11 @@ python:
 - "3.5"
 - "3.6"
 - "3.7-dev"
+before_install:
+- pyflakes=pyflakes
+- if [[ $TRAVIS_PYTHON_VERSION = 3.[23] ]]; then pyflakes='pyflakes<2'; fi
 install:
-- pip install pydiatra pyflakes
+- pip install pydiatra $pyflakes
 script:
 - ./irssilogs < /dev/null
 - python3 -m pydiatra .
