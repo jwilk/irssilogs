@@ -3,6 +3,7 @@
 # Copyright © 2010-2017 Jakub Wilk <jwilk@jwilk.net>
 # SPDX-License-Identifier: MIT
 
+import argparse
 import re
 import sys
 import datetime
@@ -17,7 +18,7 @@ def on_date_change(vars, date):
     vars.date = timestamp.date()
 
 def on_start_talk(vars, stranger):
-    vars.stranger = stranger
+    vars.their_nicks.add(stranger)
 
 def on_send(vars, time, text):
     line = '%s %s\t>>\t%s' % (vars.date, time, text)
@@ -27,6 +28,15 @@ def on_receive(vars, time, text):
     line = '%s %s\t<<\t%s' % (vars.date, time, text)
     vars.append_line(line)
 
+def on_msg(vars, time, nick, text):
+    if nick in vars.my_nicks:
+        action = on_send
+    elif nick in vars.their_nicks:
+        action = on_receive
+    else:
+        raise ValueError('unknown nick: {0}'.format(nick))
+    action(vars, time, text)
+
 def on_me(vars, time, text):
     line = '%s %s\t**\t%s' % (vars.date, time, text)
     vars.append_line(line)
@@ -35,10 +45,11 @@ regexps = {
     r'^--- Log opened (?P<timestamp>.*)': on_log_open,
     r'^--- Log closed (?P<timestamp>.*)': None,
     r'^--- Day changed (?P<date>.*)': on_date_change,
-    r'^(?P<time>[0-9:]{5}) >> (?P<text>.*)': on_send,
-    r'^(?P<time>[0-9:]{5}) << (?P<text>.*)': on_receive,
+    r'^(?P<time>[0-9:]{5}) >> (?P<text>.*)': on_send,  # Jakub's theme
+    r'^(?P<time>[0-9:]{5}) << (?P<text>.*)': on_receive,  # Jakub's theme
     r'^(?P<time>[0-9:]{5})  [*] (?P<text>.*)': on_me,
-    r'^[0-9:]{5} -!- Irssi: Starting query in [:.@\w]+ with (?P<stranger>\w+)': None,
+    r'^(?P<time>[0-9:]{5}) <(?P<nick>[^\s>]*)> (?P<text>.*)': on_msg,
+    r'^[0-9:]{5} -!- Irssi: Starting query in [:.@\w]+ with (?P<stranger>\w+)': on_start_talk,
     r'^[0-9:]{5} -!- \w+ \[[\w~@.:-]+\] has quit ': None,
     r'^[0-9:]{5} -!- \w+ is now known as \w+$': None,
 }
@@ -47,14 +58,19 @@ regexps = dict((re.compile(k), v) for k, v in regexps.items())
 
 class Vars(object):
     date = None
-    stranger = None
+    my_nicks = set()
+    their_nicks = set()
     text = []
 
     def append_line(self, line):
         self.text[-1][1].append(line)
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--my-nicks', nargs='+', metavar='NICK')
+    options = ap.parse_args()
     vars = Vars()
+    vars.my_nicks.update(options.my_nicks or ())
     for line in sys.stdin:
         for regexp, callback in regexps.items():
             m = regexp.match(line)
