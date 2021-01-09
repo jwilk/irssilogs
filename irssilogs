@@ -21,11 +21,13 @@ def on_start_talk(vars, stranger):
     vars.their_nicks.add(stranger)
 
 def on_send(vars, time, text):
-    line = '%s %s\t>>\t%s' % (vars.date, time, text)
+    date = vars.date
+    line = f'{date} {time}\t>>\t{text}'
     vars.append_line(line)
 
 def on_receive(vars, time, text):
-    line = '%s %s\t<<\t%s' % (vars.date, time, text)
+    date = vars.date
+    line = f'{date} {time}\t<<\t{text}'
     vars.append_line(line)
 
 def on_msg(vars, time, nick, text):
@@ -34,11 +36,12 @@ def on_msg(vars, time, nick, text):
     elif nick in vars.their_nicks:
         action = on_receive
     else:
-        raise ValueError('unknown nick: {0}'.format(nick))
+        raise ValueError(f'unknown nick: {nick}')
     action(vars, time, text)
 
 def on_me(vars, time, text):
-    line = '%s %s\t**\t%s' % (vars.date, time, text)
+    date = vars.date
+    line = f'{date} {time}\t**\t{text}'
     vars.append_line(line)
 
 regexps = {
