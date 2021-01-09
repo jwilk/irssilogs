@@ -8,7 +8,7 @@ import re
 import sys
 import datetime
 
-f''  # Python >= 3.6 is required
+f'{0}'  # Python >= 3.6 is required
 
 def fatal(msg):
     prog = argparse.ArgumentParser().prog
