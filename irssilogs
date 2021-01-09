@@ -8,6 +8,8 @@ import re
 import sys
 import datetime
 
+f''  # Python >= 3.6 is required
+
 def on_log_open(vars, timestamp):
     timestamp = datetime.datetime.strptime(timestamp, '%a %b %d %H:%M:%S %Y')
     vars.date = timestamp.date()
