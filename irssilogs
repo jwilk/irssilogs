@@ -49,9 +49,9 @@ regexps = {
     r'^(?P<time>[0-9:]{5}) << (?P<text>.*)': on_receive,  # Jakub's theme
     r'^(?P<time>[0-9:]{5})  [*] (?P<text>.*)': on_me,
     r'^(?P<time>[0-9:]{5}) <(?P<nick>[^\s>]*)> (?P<text>.*)': on_msg,
-    r'^[0-9:]{5} -!- Irssi: Starting query in [:.@\w]+ with (?P<stranger>\w+)': on_start_talk,
-    r'^[0-9:]{5} -!- \w+ \[[\w~@.:-]+\] has quit ': None,
-    r'^[0-9:]{5} -!- \w+ is now known as \w+$': None,
+    r'^[0-9:]{5} -!- Irssi: Starting query in [:.@\w]+ with (?P<stranger>\S+)': on_start_talk,
+    r'^[0-9:]{5} -!- \S+ \[[\w~@.:-]+\] has quit ': None,
+    r'^[0-9:]{5} -!- \S+ is now known as \S+$': None,
 }
 
 regexps = dict((re.compile(k), v) for k, v in regexps.items())
