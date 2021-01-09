@@ -10,6 +10,11 @@ import datetime
 
 f''  # Python >= 3.6 is required
 
+def fatal(msg):
+    prog = argparse.ArgumentParser().prog
+    print(f'{prog}: {msg}', file=sys.stderr)
+    sys.exit(1)
+
 def on_log_open(vars, timestamp):
     timestamp = datetime.datetime.strptime(timestamp, '%a %b %d %H:%M:%S %Y')
     vars.date = timestamp.date()
@@ -38,7 +43,7 @@ def on_msg(vars, time, nick, text):
     elif nick in vars.their_nicks:
         action = on_receive
     else:
-        raise ValueError(f'unknown nick: {nick}')
+        fatal(f'unknown nick: {nick}')
     action(vars, time, text)
 
 def on_me(vars, time, text):
@@ -85,7 +90,8 @@ def main():
                 callback(vars, **m.groupdict())
             break
         else:
-            raise ValueError(line)
+            line = line.rstrip('\n')
+            fatal(f'cannot parse line: {line}')
     for _, chunk in sorted(vars.text):
         if not chunk:
             continue
