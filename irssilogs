@@ -65,7 +65,7 @@ regexps = {
     r'^[0-9:]{5} -!- \S+ is now known as \S+$': None,
 }
 
-regexps = dict((re.compile(k), v) for k, v in regexps.items())
+regexps = {re.compile(k): v for k, v in regexps.items()}
 
 class Vars(object):
     date = None
