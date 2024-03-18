@@ -67,7 +67,7 @@ regexps = {
 
 regexps = {re.compile(k): v for k, v in regexps.items()}
 
-class Vars(object):
+class Vars:
     date = None
     my_nicks = set()
     their_nicks = set()
