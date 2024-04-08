@@ -19,7 +19,7 @@ def fatal(msg):
 def on_log_open(vars, timestamp):
     timestamp = datetime.datetime.strptime(timestamp, '%a %b %d %H:%M:%S %Y')
     vars.date = timestamp.date()
-    vars.text += (timestamp, []),
+    vars.text += [(timestamp, [])]
 
 def on_date_change(vars, date):
     timestamp = datetime.datetime.strptime(date, '%a %b %d %Y')
