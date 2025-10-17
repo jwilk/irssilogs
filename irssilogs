@@ -94,9 +94,8 @@ def main():
             line = line.rstrip('\n')
             fatal(f'cannot parse line: {line}')
     for _, chunk in sorted(vars.text):
-        if not chunk:
-            continue
-        print('\n'.join(chunk))
+        for line in chunk:
+            print(line)
 
 if __name__ == '__main__':
     main()
